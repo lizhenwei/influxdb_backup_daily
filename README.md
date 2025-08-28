@@ -2,7 +2,7 @@
 
 基于influxdb oss v2的每日增量备份与恢复方案，通过 Docker 容器实现自动化的每日备份和恢复，并管理数据保留周期。
 
-[详细方案设计](https://www.yinyubo.com/2025/08/28/influxdb%e5%a2%9e%e9%87%8f%e6%95%b0%e6%8d%ae%e6%af%8f%e6%97%a5%e5%a4%87%e4%bb%bd%e4%b8%8e%e6%81%a2%e5%a4%8d%e6%96%b9%e6%a1%88%e8%ae%be%e8%ae%a1/)
+[详细方案设计文章链接](https://www.yinyubo.com/2025/08/28/influxdb%e5%a2%9e%e9%87%8f%e6%95%b0%e6%8d%ae%e6%af%8f%e6%97%a5%e5%a4%87%e4%bb%bd%e4%b8%8e%e6%81%a2%e5%a4%8d%e6%96%b9%e6%a1%88%e8%ae%be%e8%ae%a1/)
 ## 功能特点
 
 - **每日增量备份**：自动备份前一天的增量数据
