@@ -1,0 +1,44 @@
+# 使用官方的Alpine作为基础镜像
+FROM alpine:3.22
+
+# 设置环境变量默认值
+ENV ORG_NAME=my-org
+ENV MAIN_BUCKET_NAME=my-bucket
+ENV INFLUX_HOST=http://localhost:8086
+ENV BACKUP_DIR=/backup
+
+# 安装必要的软件包
+RUN apk add --no-cache curl jq tar bash wget
+
+# 定义 InfluxDB CLI 版本
+ENV INFLUX_VERSION="2.7.5"
+
+# 下载并安装 InfluxDB CLI
+RUN wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX_VERSION}-linux-amd64.tar.gz -O /tmp/influx.tar.gz \
+    && mkdir -p /tmp/influx \
+    && tar -zxvf /tmp/influx.tar.gz -C /tmp/influx \
+    && cp /tmp/influx/influx /usr/local/bin/ \
+    && chmod +x /usr/local/bin/influx \
+    && rm -rf /tmp/influx /tmp/influx.tar.gz
+
+# 创建备份目录
+RUN mkdir -p $BACKUP_DIR && chmod 777 $BACKUP_DIR
+
+# 复制备份脚本到容器中
+COPY influx_backup_archive.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/influx_backup_archive.sh
+
+# 创建日志文件
+RUN touch /var/log/influx_backup.log && chmod 666 /var/log/influx_backup.log
+
+# 配置 crontab：每天凌晨2点执行备份任务，日志写入文件并同时输出到 docker logs
+RUN echo "0 2 * * * /usr/local/bin/influx_backup_archive.sh 2>&1 | tee -a /var/log/influx_backup.log >&2" > /etc/crontabs/root
+
+# 设置工作目录
+WORKDIR $BACKUP_DIR
+
+# 暴露备份目录作为卷
+VOLUME $BACKUP_DIR
+
+# 启动 cron 服务（前台模式，日志级别2）
+CMD ["crond", "-f", "-l", "2"]
