@@ -110,8 +110,6 @@ docker run -d \
   -e ORG_NAME=your_organization_name \
   -e MAIN_BUCKET_NAME=your_main_bucket_name \
   -v /path/to/backup:/backup \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /etc/timezone:/etc/timezone:ro \
   influxdb-backup:latest
 ```
 
@@ -127,8 +125,6 @@ docker run -d \
   -e MAIN_BUCKET_NAME=your_main_bucket_name \
   -e MAX_RETENTION_DAYS=14 \
   -v /path/to/backup:/backup \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /etc/timezone:/etc/timezone:ro \
   influxdb-restore:latest
 ```
 
