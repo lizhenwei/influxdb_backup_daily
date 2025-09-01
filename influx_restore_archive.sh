@@ -8,7 +8,8 @@ ORG="${ORG_NAME:-my-org}"
 MAIN_BUCKET="${MAIN_BUCKET_NAME:-my-bucket}"
 TOKEN="${INFLUX_TOKEN}"
 HOST="${INFLUX_HOST:-http://localhost:8086}"
-BACKUP_DIR="${BACKUP_DIR:-/backup}"
+# 固定备份目录为/backup，与influx_backup_archive.sh保持一致
+BACKUP_DIR="/backup"
 
 # -----------------------
 # 保留天数配置
