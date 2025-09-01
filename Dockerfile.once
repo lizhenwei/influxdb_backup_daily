@@ -1,0 +1,39 @@
+FROM alpine:3.22
+
+# 设置环境变量默认值
+ENV ORG_NAME=my-org
+ENV MAIN_BUCKET_NAME=my-bucket
+ENV INFLUX_HOST=http://localhost:8086
+ENV BASE_BACKUP_DIR=/backup
+# 可选：指定备份日期，格式为YYYY-MM-DD
+# ENV BACKUP_DAY=
+
+# 安装必要的软件包
+RUN apk add --no-cache curl jq tar bash wget
+
+# 定义 InfluxDB CLI 版本
+ENV INFLUX_VERSION="2.7.5"
+
+# 下载并安装 InfluxDB CLI
+RUN wget https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX_VERSION}-linux-amd64.tar.gz -O /tmp/influx.tar.gz \
+    && mkdir -p /tmp/influx \
+    && tar -zxvf /tmp/influx.tar.gz -C /tmp/influx \
+    && cp /tmp/influx/influx /usr/local/bin/ \
+    && chmod +x /usr/local/bin/influx \
+    && rm -rf /tmp/influx /tmp/influx.tar.gz
+
+# 创建备份目录
+RUN mkdir -p $BASE_BACKUP_DIR && chmod 777 $BASE_BACKUP_DIR
+
+# 复制备份脚本到容器中
+COPY influx_backup_once.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/influx_backup_once.sh
+
+# 设置工作目录
+WORKDIR $BASE_BACKUP_DIR
+
+# 暴露备份目录作为卷
+VOLUME $BASE_BACKUP_DIR
+
+# 执行一次性备份脚本
+CMD ["/usr/local/bin/influx_backup_once.sh"]
