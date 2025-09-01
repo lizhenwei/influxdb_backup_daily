@@ -77,7 +77,7 @@ rm -rf "$BACKUP_DIR"
 echo "==== Done daily archive for $YESTERDAY ===="
 
 # -----------------------
-# 清理超过保留天数的归档 bucket
+# 清理超过保留天数的归档 bucket 和备份文件
 # -----------------------
 echo "==== 开始清理超过 $MAX_RETENTION_DAYS 天的归档 bucket ===="
 
@@ -111,5 +111,35 @@ for BUCKET in $ARCHIVE_BUCKETS; do
   fi
 done
 
-echo "==== 清理完成 ===="
+echo "==== 归档 bucket 清理完成 ===="
+
+# -----------------------
+# 清理超过保留天数的备份文件(.tar.gz)
+# -----------------------
+echo "==== 开始清理超过 $MAX_RETENTION_DAYS 天的备份文件 ===="
+
+# 获取所有备份文件列表
+BACKUP_FILES=$(ls -1 "$BASE_BACKUP_DIR/archive_"*.tar.gz 2>/dev/null | sort)
+
+if [ -z "$BACKUP_FILES" ]; then
+  echo "没有找到备份文件，路径: $BASE_BACKUP_DIR/archive_*.tar.gz"
+else
+  echo "找到 $(echo "$BACKUP_FILES" | wc -l) 个备份文件"
+  
+  # 处理每个备份文件
+  for FILE in $BACKUP_FILES; do
+    # 从文件名提取日期（去掉路径、archive_前缀和.tar.gz后缀）
+    FILE_DATE=$(basename "$FILE" .tar.gz | sed 's/^archive_//')
+    
+    # 将日期转换为时间戳进行比较
+    FILE_TIMESTAMP=$(date -d "$FILE_DATE" +%s 2>/dev/null)
+    
+    if [ $? -eq 0 ] && [ $FILE_TIMESTAMP -lt $THRESHOLD_DATE ]; then
+      echo "删除过期的备份文件: $FILE ($FILE_DATE)"
+      rm -f "$FILE"
+    fi
+  done
+fi
+
+echo "==== 备份文件清理完成 ===="
 
