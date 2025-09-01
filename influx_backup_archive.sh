@@ -25,6 +25,8 @@ MAX_RETENTION_DAYS=${MAX_RETENTION_DAYS:-14}
 # -----------------------
 # 使用兼容BusyBox的方式计算昨天的日期
 # 计算方式: 当前时间戳减去86400秒(一天)
+# 注意: 由于Docker容器默认使用UTC时区，如果要按照本地时区计算日期，
+# 请确保在docker run命令中添加时区文件挂载: -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro
 YESTERDAY=$(date -d @$(($(date +%s) - 86400)) +%F)
 BUCKET="archive_${YESTERDAY}"
 BACKUP_DIR="$BASE_BACKUP_DIR/$BUCKET"
